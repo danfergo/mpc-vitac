@@ -178,7 +178,6 @@ class GraspingCylinderBehaviour:
             cv2.imwrite(f'data/{self.dataset_name}/r/frame_{str(self.i).zfill(5)}.jpg', right_touch_frame)
 
             self.ps = np.concatenate([self.ps, p.T], axis=0) if self.ps is not None else p.T
-            print(self.ps.shape)
             with open(f'data/{self.dataset_name}/p.yaml', 'wb') as f:
                 np.save(f, self.ps)
             # yaml.dump(self.ps, open(, 'w'))

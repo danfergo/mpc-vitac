@@ -7,7 +7,7 @@ import numpy as np
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
-data_path = join('../data')
+data_path = join('../../data')
 dataset_name = 'pick_and_place/c'
 
 dataset_path = join(__location__, data_path, dataset_name)

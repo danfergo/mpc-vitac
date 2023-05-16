@@ -12,6 +12,7 @@ import numpy as np
 import cv2
 
 from dfgiatk.ops.img import cvt_batch, CVT_HWC2CHW, CVT_CHW2HWC
+from experiments.shared.transform import img_transform
 
 
 def loader(partition, inputs=['c:0'], outputs=['c:1'], input_frames=1):
@@ -39,24 +40,24 @@ def loader(partition, inputs=['c:0'], outputs=['c:1'], input_frames=1):
 
         return _
 
-    def img_transform(endpoint, modality):
-        aug_key = f'{partition}_{endpoint}{modality}_transform'
-        aug = aug_key in e
-
-        def _(img_batch, samples):
-            if len(img_batch[0].shape) == 3:
-                batch = np.array([
-                    cv2.resize(im, e.img_size) for im in img_batch
-                ])
-            else:
-                batch = np.array([
-                    [cv2.resize(im, e.img_size) for im in stack] for stack in img_batch
-                ])
-            if aug:
-                batch = e[aug_key](batch, samples)
-            return cvt_batch((batch / 255.0), CVT_HWC2CHW).astype(np.float32)
-
-        return _
+    # def img_transform(endpoint, modality):
+    #     aug_key = f'{partition}_{endpoint}{modality}_transform'
+    #     aug = aug_key in e
+    #
+    #     def _(img_batch, samples):
+    #         if len(img_batch[0].shape) == 3:
+    #             batch = np.array([
+    #                 cv2.resize(im, e.img_size) for im in img_batch
+    #             ])
+    #         else:
+    #             batch = np.array([
+    #                 [cv2.resize(im, e.img_size) for im in stack] for stack in img_batch
+    #             ])
+    #         if aug:
+    #             batch = e[aug_key](batch, samples)
+    #         return cvt_batch((batch / 255.0), CVT_HWC2CHW).astype(np.float32)
+    #
+    #     return _
 
     # with open(dataset_path + '/p.npy', 'rb') as f:
     #     positions = np.load(f).reshape(-1, 7).astype(np.float32)
@@ -66,7 +67,7 @@ def loader(partition, inputs=['c:0'], outputs=['c:1'], input_frames=1):
 
     loaders = {
         'l': lambda offset, endpoint: ImageLoader(
-            transform=img_transform(endpoint, 'l'),
+            transform=img_transform(partition, endpoint, 'l'),
             img_path=img_path('touch', offset),
             stack=input_frames if endpoint == 'i' else 1,
             use_cache=False
@@ -76,7 +77,7 @@ def loader(partition, inputs=['c:0'], outputs=['c:1'], input_frames=1):
         #     img_path=img_path('r', offset)
         # ),
         'c': lambda offset, endpoint: ImageLoader(
-            transform=img_transform(endpoint, 'c'),
+            transform=img_transform(partition, endpoint, 'c'),
             img_path=img_path('vision', offset),
             stack=input_frames if endpoint == 'i' else 1,
             use_cache=False

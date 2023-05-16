@@ -125,33 +125,34 @@ class ImageLoader(Labeler):
 
 class VideoFrameLoader(Labeler):
 
-    def __init__(self, transform=None, frame_path=None, use_cache=True):
+    def __init__(self, transform=None, frame_path=None, use_cache=True, stack=False):
         self.frame_path = frame_path
         self.use_cache = use_cache
         self.caps_cache = {}
+        self.stack = stack
         super().__init__(transform=transform)
+
+    def _get_img(self, cap, frame_idx):
+        cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
+        res, frame = cap.read()
+        if not res:
+            raise FileNotFoundError()
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+        return frame
 
     def get_label(self, s, s_bin):
         video_path, frame_idx = self.frame_path(s)
 
-        # if video_path not in self.caps_cache:
         cap = cv2.VideoCapture(video_path)
-        # cap = self.caps_cache[video_path]
 
-        # s is a tuple, s[0] is the video key, s[1] is the frame.
-        cap.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
-        res, frame = cap.read()
+        if self.stack is False:
+            ret = self._get_img(cap, frame_idx)
+        else:
+            ret = [self._get_img(cap, frame_idx + o) for o in range(self.stack)]
+
         cap.release()
-
-        return frame
-
-        # if not self.use_cache or (self.use_cache and img_path not in CACHE):
-        #     img = cv2.cvtColor(cv2.imread(img_path), cv2.COLOR_BGR2RGB)
-        #     if not self.use_cache:
-        #         return img
-        #     CACHE[img_path] = img
-        #
-        # return CACHE[img_path]
+        return ret
 
 
 class LambdaLoader(Labeler):

@@ -16,19 +16,14 @@ def force_cudnn_initialization():
     dev = torch.device('cuda')
     torch.nn.functional.conv2d(torch.zeros(s, s, s, s, device=dev), torch.zeros(s, s, s, s, device=dev))
 
-
 force_cudnn_initialization()
 
 from dfgiatk.experimenter.event_listeners.training_samples import TrainingSamples
 from dfgiatk.train import fit_to_dataset, predict_batch
 from experiments.losses.perceptual_loss import VGGPerceptualLoss
-from experiments.nn.simpler_brain import SimplerBrain
-from experiments.nn.temporal_cortex import TemporalCortex
-from experiments.nn.touch_cortex import TouchCortex
-from experiments.nn.vision_cortex import VisionCortex
-from experiments.shared.transform import transform
 
-from experiments.shared.visgel_loaders import loader
+from experiments.shared.touchngo_loaders import loader
+from experiments.shared.transform import transform
 
 from piqa import SSIM, HaarPSI, VSI, PSNR, LPIPS
 
@@ -36,23 +31,24 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file
 
 config = {
     'description': """
-        # Train VisGel Auto-encoder
+        # Train Touch and Go Auto-encoder
     """,
     'config': {
-        'lr': 0.1,
+        'lr': 0.001,
 
         # data
-        'data_path': '/media/danfergo/SSD2T/VisGel/data/',
+        # 'data_path': '/media/danfergo/SSD2T/VisGel/data/',
+        'data_path': '/media/danfergo/SSD2T/touch-and-go/',
         'img_size': (128, 128),
         '{data_loader}': lambda: loader('train',
                                         inputs=['c:0', 'l:0'],
                                         outputs=['c:4', 'l:4'],
-                                        input_frames=3
+                                        stack=3
                                         ),
         '{val_loader}': lambda: loader('val',
                                        inputs=['c:0', 'l:0'],
                                        outputs=['c:4', 'l:4'],
-                                       input_frames=3
+                                       stack=3
                                        ),
         # 'train_ic_transform': transform(),
 
@@ -68,10 +64,6 @@ config = {
                 ResNet3DAutoEncoder(*get_configs('resnet50')),
                 only_decoder=True,
             )
-            # , skip_connection=True
-            # TemporalCortex()
-            # weights=e.ws('outputs', 'train_ae', 'runs', '2023-03-07 21:53:47', 'out', 'latest_model'),
-            # skip_predictive_model=True  # when True, set the input-output data to the same state.
         ),
 
         # train
@@ -82,7 +74,7 @@ config = {
         'epochs': 100,
         'batch_size': 24,
         'batches_per_epoch': 50,
-        'feed_size': 2,
+        'feed_size': 1,
 
         # validation
         '{metrics}': lambda: [

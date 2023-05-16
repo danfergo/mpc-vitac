@@ -13,9 +13,10 @@ import numpy as np
 import cv2
 
 from dfgiatk.ops.img import cvt_batch, CVT_HWC2CHW, CVT_CHW2HWC
+from experiments.shared.transform import img_transform
 
 
-def loader(partition, inputs=['c:0'], outputs=['c:1']):
+def loader(partition, inputs=['c:0'], outputs=['c:1'], stack=False):
     # data_part = 'data_seen' if partition == 'train' else 'data_unseen'
 
     dataset_path = path.join(e.data_path, 'dataset')
@@ -37,19 +38,19 @@ def loader(partition, inputs=['c:0'], outputs=['c:1']):
     #
     #     return _
 
-    def img_transform(endpoint, modality):
-        aug_key = f'{partition}_{endpoint}{modality}_transform'
-        aug = aug_key in e
-
-        def _(img_batch, samples):
-            batch = np.array([
-                cv2.resize(im, e.img_size) for im in img_batch
-            ])
-            if aug:
-                batch = e[aug_key](batch, samples)
-            return cvt_batch((batch / 255.0), CVT_HWC2CHW).astype(np.float32)
-
-        return _
+    # def img_transform(endpoint, modality):
+    #     aug_key = f'{partition}_{endpoint}{modality}_transform'
+    #     aug = aug_key in e
+    #
+    #     def _(img_batch, samples):
+    #         batch = np.array([
+    #             cv2.resize(im, e.img_size) for im in img_batch
+    #         ])
+    #         if aug:
+    #             batch = e[aug_key](batch, samples)
+    #         return cvt_batch((batch / 255.0), CVT_HWC2CHW).astype(np.float32)
+    #
+    #     return _
 
     # with open(dataset_path + '/p.npy', 'rb') as f:
     #     positions = np.load(f).reshape(-1, 7).astype(np.float32)
@@ -59,16 +60,18 @@ def loader(partition, inputs=['c:0'], outputs=['c:1']):
 
     loaders = {
         'l': lambda offset, endpoint: VideoFrameLoader(
-            transform=img_transform(endpoint, 'l'),
-            frame_path=video_path('gelsight.mp4', offset)
+            transform=img_transform(partition, endpoint, 'l'),
+            frame_path=video_path('gelsight.mp4', offset),
+            stack=stack if endpoint == 'i' else False
         ),
         # 'r': lambda offset, endpoint: ImageLoader(
         #     transform=img_transform(endpoint, 'r'),
         #     img_path=img_path('r', offset)
         # ),
         'c': lambda offset, endpoint: VideoFrameLoader(
-            transform=img_transform(endpoint, 'c'),
-            frame_path=video_path('video.mp4', offset)
+            transform=img_transform(partition, endpoint, 'c'),
+            frame_path=video_path('video.mp4', offset),
+            stack=stack if endpoint == 'i' else False
         ),
         # 'p': lambda offset, endpoint: LambdaLoader(
         #     lambda key, _: load_positions(key, offset)
@@ -94,7 +97,7 @@ def loader(partition, inputs=['c:0'], outputs=['c:1']):
 
     def transform_key(key):
         rec_sample = samples[key]
-        sample_with_rnd_frame = (rec_sample[0], random.randint(0, rec_sample[1] - 1))
+        sample_with_rnd_frame = (rec_sample[0], random.randint(0, rec_sample[1] - 1 - stack))
         return sample_with_rnd_frame
 
     return DatasetSampler(

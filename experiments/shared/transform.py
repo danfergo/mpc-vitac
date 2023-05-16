@@ -3,6 +3,29 @@ import imgaug.augmenters as iaa
 from dfgiatk.ops.img import cvt_batch, CVT_HWC2CHW
 
 import numpy as np
+import cv2
+
+from dfgiatk.experimenter import e
+
+
+def img_transform(partition, endpoint, modality):
+    aug_key = f'{partition}_{endpoint}{modality}_transform'
+    aug = aug_key in e
+
+    def _(img_batch, samples):
+        if len(img_batch[0].shape) == 3:
+            batch = np.array([
+                cv2.resize(im, e.img_size) for im in img_batch
+            ])
+        else:
+            batch = np.array([
+                [cv2.resize(im, e.img_size) for im in stack] for stack in img_batch
+            ])
+        if aug:
+            batch = e[aug_key](batch, samples)
+        return cvt_batch((batch / 255.0), CVT_HWC2CHW).astype(np.float32)
+
+    return _
 
 
 def transform():
