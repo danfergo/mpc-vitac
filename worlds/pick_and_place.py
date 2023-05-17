@@ -3,19 +3,18 @@ import time
 import yaml
 from yarok.comm.components.cam.cam import Cam
 
+from worlds.shared.cross_spawn import parallel_run
+from worlds.shared.memory import Memory
+from worlds.shared.robotbody import RobotBody
 from .components.geltip.geltip import GelTip
 from .components.tumble_tower.tumble_tower import TumbleTower
 
-from yarok import Platform, Injector, component
+from yarok import Platform, Injector, component, ConfigBlock
 from yarok.comm.worlds.empty_world import EmptyWorld
 from yarok.comm.components.ur5e.ur5e import UR5e
 from yarok.comm.components.robotiq_2f85.robotiq_2f85 import Robotiq2f85
 
 from math import pi
-import os
-import numpy as np
-
-import cv2
 
 
 @component(
@@ -27,13 +26,19 @@ import cv2
         Robotiq2f85,
         Cam
     ],
+    defaults={
+        'sx': 0,
+        'sy': 0,
+        'ex': 0,
+        'ey': 0
+    },
     template="""
         <mujoco>
             <asset>
                 <texture type="skybox" 
-                file="assets/robot_lab.png"
-                rgb1="0.6 0.6 0.6" 
-                rgb2="0 0 0"/>
+                    file="assets/robot_lab.png"
+                    rgb1="0.6 0.6 0.6" 
+                    rgb2="0 0 0"/>
                 <texture 
                     name="white_wood_texture"
                     type="cube" 
@@ -57,7 +62,7 @@ import cv2
                     <geom 
                         type="box" 
                         size="0.03 0.03 0.03" 
-                        pos="0.13 -0.135 0.131" 
+                        pos="${0.13 + sx*0.01} ${-0.135 + sy*0.01} 0.131" 
                         mass="0.0001"
                         material="red_wood"
                         zaxis="0 1 0"/>
@@ -67,7 +72,7 @@ import cv2
                     <geom 
                         type="box" 
                         size="0.03 0.03 0.03" 
-                        pos="0.13 -0.135 0.191" 
+                        pos="${0.13 + sx*0.01} ${-0.135 + sy*0.01} 0.191" 
                         mass="0.0001"
                         material="green_wood"
                         zaxis="0 1 0"/>
@@ -78,7 +83,7 @@ import cv2
                     <geom 
                         type="box" 
                         size="0.03 0.03 0.03" 
-                        pos="0.13 -0.135 0.221" 
+                        pos="${0.13 + sx*0.01} ${-0.135 + sy*0.01} 0.221" 
                         mass="0.0001"
                         material="yellow_wood"
                         zaxis="0 1 0"/>
@@ -109,32 +114,17 @@ class BlocksTowerTestWorld:
     pass
 
 
-DOWN = [3.11, 1.6e-7, 3.11]
-
-START_POS_UP = [0.3, -0.5, 0.21]
-START_POS_DOWN = [0.3, -0.5, 0.11]
-END_POS_UP = [0.6, -0.5, 0.21]
-END_POS_DOWN = [0.6, -0.5, 0.115]
-
-BLOCK_SIZE = 0.06
-
-
 def z(pos, delta):
     new_pos = pos.copy()
     new_pos[2] += delta
     return new_pos
 
 
-class GraspingCylinderBehaviour:
+class PickAndPlaceBehaviour:
 
-    def __init__(self, injector: Injector):
-        self.cam: Cam = injector.get('cam')
-        self.arm: UR5e = injector.get('arm')
-        self.left_geltip: GelTip = injector.get('left_geltip')
-        self.right_geltip: GelTip = injector.get('right_geltip')
-        self.gripper: Robotiq2f85 = injector.get('gripper')
-
-        self.arm.set_ws([
+    def __init__(self, injector: Injector, config: ConfigBlock):
+        self.body = RobotBody(injector)
+        self.body.arm.set_ws([
             [- pi, pi],  # shoulder pan
             [- pi, -pi / 2],  # shoulder lift,
             [- 2 * pi, 2 * pi],  # elbow
@@ -142,104 +132,84 @@ class GraspingCylinderBehaviour:
             [0, pi],  # wrist 2
             [- 2 * pi, 2 * pi]  # wrist 3
         ])
-        self.arm.set_speed(pi / 24)
-
+        self.body.arm.set_speed(pi / 24)
         self.pl: Platform = injector.get(Platform)
-        self.t = time.time()
-        self.i = 0
-        self.save_dataset = True
-        self.dataset_name = 'pick_and_place'
-        self.prepare_dataset_dirs()
-        self.ps = None
+        self.config = config
+        self.memory = Memory('pick_and_place', self.body, self.config, skip_right_sensor=False)
 
-    def prepare_frame(self, frame):
-        frame = cv2.resize(frame, (320, 240))
-        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-        frame = frame[:, 40:40 + 240, :]
-        frame = cv2.resize(frame, (224, 224))
-        return frame
+        self.DOWN = [3.11, 1.6e-7, 3.11]
+        self.BLOCK_SIZE = 0.06
 
-    def prepare_dataset_dirs(self):
-        if self.save_dataset:
-            os.mkdir(f'data/{self.dataset_name}')
-            [os.mkdir(f'data/{self.dataset_name}/{d}') for d in ['c', 'l', 'r']]
+        sx = config['sx'] * 0.01
+        sy = config['sy'] * 0.01
+        ex = config['ex'] * 0.01
+        ey = config['ey'] * 0.01
 
-    def save_frame(self):
-        if self.save_dataset:
-            cam_frame = self.prepare_frame(self.cam.read())
-            left_touch_frame = self.prepare_frame(self.left_geltip.read())
-            right_touch_frame = self.prepare_frame(self.right_geltip.read())
-
-            q_xyz = self.arm.at_xyz()
-            p = np.array(q_xyz[0].tolist() + q_xyz[1].tolist() + [self.gripper.at()])
-
-            cv2.imwrite(f'data/{self.dataset_name}/c/frame_{str(self.i).zfill(5)}.jpg', cam_frame)
-            cv2.imwrite(f'data/{self.dataset_name}/l/frame_{str(self.i).zfill(5)}.jpg', left_touch_frame)
-            cv2.imwrite(f'data/{self.dataset_name}/r/frame_{str(self.i).zfill(5)}.jpg', right_touch_frame)
-
-            self.ps = np.concatenate([self.ps, p.T], axis=0) if self.ps is not None else p.T
-            with open(f'data/{self.dataset_name}/p.yaml', 'wb') as f:
-                np.save(f, self.ps)
-            # yaml.dump(self.ps, open(, 'w'))
-
-            self.i += 1
+        self.START_POS_UP = [0.3 + sx, -0.5 + sy, 0.21]
+        self.START_POS_DOWN = [0.3 + sx, -0.5 + sy, 0.11]
+        self.END_POS_UP = [0.6 - ex, -0.5 - ey, 0.21]
+        self.END_POS_DOWN = [0.6 - ex, -0.5 - ey, 0.115]
 
     def wait(self, arm=None, gripper=None):
         def cb():
-            self.save_frame()
+            self.memory.save()
 
             self.pl.wait_seconds(0.1)
 
             if arm is not None:
-                return self.arm.is_at(arm)
+                return self.body.arm.is_at(arm)
             else:
-                return self.gripper.is_at(gripper)
+                return self.body.gripper.is_at(gripper)
 
         self.pl.wait(cb)
 
     def on_start(self):
         def move_arm(p):
-            q = self.arm.ik_xyz(xyz=p, xyz_angles=DOWN)
-            self.arm.move_q(q)
+            q = self.body.arm.ik_xyz(xyz=p, xyz_angles=self.DOWN)
+            self.body.arm.move_q(q)
             self.wait(arm=q)
 
         def move_gripper(q):
-            self.gripper.close(q)
+            self.body.gripper.close(q)
             self.wait(gripper=q)
 
         # set the arm in the initial position
-        self.pl.wait(self.arm.move_xyz(xyz=START_POS_UP, xyz_angles=DOWN))
+        self.pl.wait(self.body.arm.move_xyz(xyz=self.START_POS_UP, xyz_angles=self.DOWN))
+
+        self.memory.prepare()
 
         # do the pick and place.
         for i in range(3):
             # before grasping.
-            move_arm(START_POS_UP)
+            move_arm(self.START_POS_UP)
 
             # grasps block.
-            move_arm(z(START_POS_DOWN, -i * BLOCK_SIZE))
+            move_arm(z(self.START_POS_DOWN, -i * self.BLOCK_SIZE))
             move_gripper(0.26)
 
             # moves.
-            move_arm(START_POS_UP)
-            move_arm(END_POS_UP)
+            move_arm(self.START_POS_UP)
+            move_arm(self.END_POS_UP)
 
             # places.
-            move_arm(z(END_POS_DOWN, -(2 - i) * BLOCK_SIZE))
+            move_arm(z(self.END_POS_DOWN, -(2 - i) * self.BLOCK_SIZE))
             move_gripper(0)
 
             # moves back
-            move_arm(END_POS_UP)
-            move_arm(START_POS_UP)
+            move_arm(self.END_POS_UP)
+            move_arm(self.START_POS_UP)
 
 
-if __name__ == '__main__':
+def launch_world(**kwargs):
     Platform.create({
         'world': BlocksTowerTestWorld,
-        'behaviour': GraspingCylinderBehaviour,
+        'behaviour': PickAndPlaceBehaviour,
         'defaults': {
             'plugins': [
             ],
+            'behaviour': kwargs,
             'components': {
+                '/': kwargs,
                 '/gripper': {
                     'left_tip': False,
                     'right_tip': False
@@ -256,3 +226,14 @@ if __name__ == '__main__':
         },
 
     }).run()
+
+
+if __name__ == '__main__':
+    parallel_run(launch_world,
+                 {
+                     'sx': [0, 3],
+                     'sy': [0, 3],
+                     'ex': [0, 3],
+                     'ey': [0, 3]
+                 },
+                 parallel=8)

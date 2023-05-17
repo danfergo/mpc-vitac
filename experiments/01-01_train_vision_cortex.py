@@ -9,7 +9,7 @@ from dfgiatk.train import fit_to_dataset, predict_batch
 from experiments.losses.perceptual_loss import VGGPerceptualLoss
 from experiments.nn.vision_cortex import VisionCortex
 
-from experiments.shared.loaders import loader
+from experiments.shared.vitacworld_loaders import loader
 from experiments.shared.transform import transform
 
 from piqa import SSIM, HaarPSI, VSI, PSNR

@@ -1,7 +1,7 @@
 import time
 from yarok.comm.components.cam.cam import Cam
 
-from worlds.shared.cross_spawn import cross_spawn
+from worlds.shared.cross_spawn import parallel_run
 from worlds.shared.memory import Memory
 from worlds.shared.robotbody import RobotBody
 from .components.geltip.geltip import GelTip
@@ -74,12 +74,8 @@ class PushingTowerBehaviour:
             [- 2 * pi, 2 * pi],  # wrist 2
             [- 2 * pi, 2 * pi]  # wrist 3
         ])
-
         self.pl: Platform = injector.get(Platform)
         self.config = config
-        self.save_dataset = True
-        self.rec = None
-        self.data_path = None
         self.memory = Memory('pushing_tower', self.body, self.config, skip_right_sensor=False)
 
     def on_start(self):
@@ -96,7 +92,8 @@ class PushingTowerBehaviour:
 
         self.body.arm.move_xyz(xyz=[0.1 + 0.01 * self.config['ox'],
                                     0.4 + 0.0025 * self.memory.i,
-                                    0.3 + 0.01 * self.config['oz'] + 0.0025 * self.memory.i * + 0.001 * self.config['dz']
+                                    0.3 + 0.01 * self.config['oz'] + 0.0025 * self.memory.i * + 0.001 * self.config[
+                                        'dz']
                                     ], xyz_angles=FRONT)
 
         self.pl.wait_seconds(0.1)
@@ -115,13 +112,10 @@ def launch_world(**kwargs):
 
 
 if __name__ == '__main__':
-    cross_spawn(launch_world, {'oz': [0, 6], 'dz': [-2, 3], 'ox': [-2, 3]}, parallel=5)
-
-    # Platform.create({
-    #     'world': BlocksTowerTestWorld,
-    #     'behaviour': PushingTowerBehaviour,
-    #     'defaults': {
-    #         'plugins': [
-    #         ]
-    #     }
-    # }).run()
+    parallel_run(launch_world,
+                 {
+                     'oz': [0, 6],
+                     'dz': [-2, 3],
+                     'ox': [-2, 3]
+                 },
+                 parallel=5)

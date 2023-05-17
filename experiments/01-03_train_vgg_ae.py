@@ -24,7 +24,7 @@ from experiments.nn.temporal_cortex import TemporalCortex
 from experiments.nn.touch_cortex import TouchCortex
 from experiments.nn.vision_cortex import VisionCortex
 
-from experiments.shared.loaders import loader
+from experiments.shared.vitacworld_loaders import loader
 from experiments.shared.transform import transform
 
 from piqa import SSIM, HaarPSI, VSI, PSNR, LPIPS

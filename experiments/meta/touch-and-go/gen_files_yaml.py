@@ -16,7 +16,6 @@ def n_frames(p):
 
 def time_data(npy_path):
 	data = np.load(npy_path)
-	print('->', data.shape, data[0], data[10])
 	return data
 
 def main():

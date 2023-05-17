@@ -99,7 +99,7 @@ class NumpyMapsLabeler(Labeler):
 
 class ImageLoader(Labeler):
 
-    def __init__(self, transform=None, img_path=None, use_cache=True, stack=1):
+    def __init__(self, transform=None, img_path=None, use_cache=True, stack=False):
         self.img_path = img_path
         self.use_cache = use_cache
         self.stack = stack
@@ -108,16 +108,16 @@ class ImageLoader(Labeler):
     def _get_img(self, s, s_bin, offset):
         img_path = s if self.img_path is None else self.img_path(s, offset)
 
-        if not self.use_cache or (self.use_cache and img_path not in CACHE):
-            img = cv2.cvtColor(cv2.imread(img_path), cv2.COLOR_BGR2RGB)
-            if not self.use_cache:
-                return img
-            CACHE[img_path] = img
-
-        return CACHE[img_path]
+        # if not self.use_cache or (self.use_cache and img_path not in CACHE):
+        return cv2.cvtColor(cv2.imread(img_path), cv2.COLOR_BGR2RGB)
+            # if not self.use_cache:
+            #     return img
+            # CACHE[img_path] = img
+        #
+        # return CACHE[img_path]
 
     def get_label(self, s, s_bin):
-        if self.stack == 1:
+        if self.stack is False:
             return self._get_img(s, s_bin, 0)
         else:
             return [self._get_img(s, s_bin, i) for i in range(self.stack)]

@@ -24,7 +24,6 @@ def img_transform(partition, endpoint, modality):
         if aug:
             batch = e[aug_key](batch, samples)
         return cvt_batch((batch / 255.0), CVT_HWC2CHW).astype(np.float32)
-
     return _
 
 

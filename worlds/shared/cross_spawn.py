@@ -1,4 +1,4 @@
-def cross_spawn(fn, options, parallel=1):
+def parallel_run(fn, options, parallel=1):
     from multiprocessing import Process
 
     r_process = {'i': 0, 'processes': []}

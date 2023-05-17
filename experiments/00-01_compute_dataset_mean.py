@@ -3,7 +3,7 @@ from os import path
 import numpy as np
 
 from dfgiatk.experimenter import run, e, Logger, Validator, Plotter, EBoard, ModelSaver
-from experiments.shared.loaders import loader
+from experiments.shared.vitacworld_loaders import loader
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 

@@ -8,7 +8,7 @@ from dfgiatk.experimenter.event_listeners.training_samples import TrainingSample
 from dfgiatk.train import fit_to_dataset, predict_batch
 from experiments.nn.touch_cortex import TouchCortex
 
-from experiments.shared.loaders import loader
+from experiments.shared.vitacworld_loaders import loader
 from experiments.shared.transform import transform
 
 from piqa import SSIM, HaarPSI, VSI, PSNR

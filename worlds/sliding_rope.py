@@ -1,11 +1,15 @@
+import math
 import time
 
 from yarok.comm.components.cam.cam import Cam
 
+from worlds.shared.cross_spawn import parallel_run
+from worlds.shared.memory import Memory
+from worlds.shared.robotbody import RobotBody
 from .components.geltip.geltip import GelTip
 from .components.tumble_tower.tumble_tower import TumbleTower
 
-from yarok import Platform, Injector, component
+from yarok import Platform, Injector, component, ConfigBlock
 from yarok.comm.worlds.empty_world import EmptyWorld
 from yarok.comm.components.ur5e.ur5e import UR5e
 from yarok.comm.components.robotiq_2f85.robotiq_2f85 import Robotiq2f85
@@ -71,7 +75,6 @@ class BlocksTowerTestWorld:
 DOWN = [3.11, -1.6e-7, -pi / 2]
 # FRONT = [3.11, - pi / 2, pi / 2]
 # FRONT = [pi / 2 , - pi / 2 , pi / 2 ]
-FRONT = [0.05, 1.5, pi / 2]
 
 START_POS = [0.8, 0.01, 0.2]
 END_POS = [0.6, 0.2, 0.2]
@@ -79,14 +82,9 @@ END_POS = [0.6, 0.2, 0.2]
 
 class PushingTowerBehaviour:
 
-    def __init__(self, injector: Injector):
-        self.cam: Cam = injector.get('cam')
-        self.arm: UR5e = injector.get('arm')
-        self.gripper: Robotiq2f85 = injector.get('gripper')
-        self.left_geltip: GelTip = injector.get('left_geltip')
-        self.pl: Platform = injector.get(Platform)
-
-        self.arm.set_ws([
+    def __init__(self, injector: Injector, config: ConfigBlock):
+        self.body = RobotBody(injector)
+        self.body.arm.set_ws([
             [- pi, pi],  # shoulder pan
             [- pi, 0],  # shoulder lift,
             [- 2 * pi, 2 * pi],  # elbow
@@ -94,58 +92,42 @@ class PushingTowerBehaviour:
             [- 2 * pi, 2 * pi],  # wrist 2
             [- 2 * pi, 2 * pi]  # wrist 3
         ])
-
-        self.t = time.time()
-        self.i = 0
-        self.dataset_name = 'sliding_rope'
-        self.save_dataset = True
-        self.prepare_dataset_dirs()
-
-    def prepare_frame(self, frame):
-        frame = cv2.resize(frame, (320, 240))
-        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-        frame = frame[:, 40:40 + 240, :]
-        frame = cv2.resize(frame, (224, 224))
-        return frame
-
-    def prepare_dataset_dirs(self):
-        if self.save_dataset:
-            os.mkdir(f'data/{self.dataset_name}')
-            os.mkdir(f'data/{self.dataset_name}/v')
-            os.mkdir(f'data/{self.dataset_name}/lt')
-
-    def save_frame(self):
-        if self.save_dataset:
-            cam_frame = self.prepare_frame(self.cam.read())
-            left_touch_frame = self.prepare_frame(self.left_geltip.read())
-
-            cv2.imwrite(f'data/{self.dataset_name}/v/frame_{str(self.i).zfill(5)}.jpg', cam_frame)
-            cv2.imwrite(f'data/{self.dataset_name}/lt/frame_{str(self.i).zfill(5)}.jpg', left_touch_frame)
-            self.i += 1
+        self.pl: Platform = injector.get(Platform)
+        self.config = config
+        self.memory = Memory('sliding_rope', self.body, self.config, skip_right_sensor=True)
+        self.a = config['a']
+        self.dz = config['dz']
+        self.FRONT = [0.05, 1.5, pi / 2 + pi/10]
+        self.start_t = None
 
     def on_start(self):
         self.pl.wait(
-            self.arm.move_xyz(xyz=[0.75, 0.3, 0.2], xyz_angles=FRONT)
+            self.body.arm.move_xyz(xyz=[0.75, 0.3, 0.2], xyz_angles=self.FRONT)
         )
-        self.t = time.time()
+        self.start_t = time.time()
+        self.memory.prepare()
 
     def on_update(self):
-        self.save_frame()
+        self.memory.save()
 
-        delta = time.time() - self.t
-        if self.i > 100:
+        delta = time.time() - self.start_t
+        if self.memory.i > 100:
             return False
 
-        self.arm.move_xyz(xyz=[0.75 - 0.01 * delta, 0.3, 0.2], xyz_angles=FRONT)
+        self.body.arm.move_xyz(xyz=[0.75 - 0.01 * delta,
+                                    0.3,
+                                    0.2 + 0.001 * self.dz + (1 / 5) * 0.01 * self.a * math.cos(0.01 * delta)],
+                               xyz_angles=self.FRONT)
 
         self.pl.wait_seconds(0.09)
 
 
-if __name__ == '__main__':
+def launch_world(**kwargs):
     Platform.create({
         'world': BlocksTowerTestWorld,
         'behaviour': PushingTowerBehaviour,
         'defaults': {
+            'behaviour': kwargs,
             'plugins': [
             ]
         },
@@ -153,3 +135,13 @@ if __name__ == '__main__':
 
         }
     }).run()
+
+
+if __name__ == '__main__':
+    parallel_run(launch_world,
+                 {
+                     'dz': [-2, 3],
+                     'do': [-2, 3],
+                     'a': [0, 5],
+                 },
+                 parallel=8)

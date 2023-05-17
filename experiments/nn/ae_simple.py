@@ -11,13 +11,22 @@ class AutoEncoderSimple(nn.Module):
     def __init__(self,
                  vis_ae=None,
                  touch_ae=None,
+                 action=False
                  ):
         super(AutoEncoderSimple, self).__init__()
         self.vis_ae = vis_ae
         self.touch_ae = touch_ae
+
+        if action:
+            self.conv2d = nn.Conv2d(in_channels=2051, out_channels=2048, kernel_size=3, stride=1, padding='same')
+            self.bn = nn.BatchNorm2d(num_features=2048)
+            self.relu = nn.ReLU()
+            torch.nn.init.xavier_uniform_(self.conv2d.weight)
+            self.conv2d.bias.data.fill_(0.0)
+
         # self.associative_cortex = parietal_cortex
 
-    def forward(self, v_t0, l_t0):
+    def forward(self, v_t0, l_t0, action=None):
         # encode/project observations
         ev_t0 = self.vis_ae.encode(v_t0)
         el_t0 = self.touch_ae.encode(l_t0)
@@ -25,12 +34,22 @@ class AutoEncoderSimple(nn.Module):
 
         # em_t0 = # ??? \
         # self.touch_cortex.encode(m_t0)
-        # em_t0 = m_t0[:, :, None, None]
-        # e_size = ev_t0.size()[2]
-        # em_t0 = torch.tile(em_t0, (1, 1, e_size, e_size))
 
         # associate vision and touch (s_c = current state)
-        es_t0 = torch.cat((ev_t0, el_t0), dim=1)  # self.associative_cortex.associate(ev_t0, el_t0, er_t0, em_t0)
+        if action is None:
+            es_t0 = torch.cat((ev_t0, el_t0), dim=1)  # self.associative_cortex.associate(ev_t0, el_t0, er_t0, em_t0)
+        else:
+            action_t0 = action[:, :, None, None]
+            e_size = ev_t0.size()[2]
+            action_t0 = torch.tile(action_t0, (1, 1, e_size, e_size))
+            # print(ev_t0.size(), el_t0.size(), action_t0.size())
+            es_t0 = torch.cat((ev_t0, el_t0, action_t0),
+                              dim=1)  # self.associative_cortex.associate(ev_t0, el_t0, er_t0, em_t0)
+
+            es_t0 = self.conv2d(es_t0)
+            es_t0 = self.bn(es_t0)
+            es_t0 = self.relu(es_t0)
+
         es_tx = es_t0
         # predict next state (s_n = next state)
         # es_t1 = self.temporal_cortex.forward(es_t0)
