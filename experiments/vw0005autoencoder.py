@@ -39,12 +39,12 @@ config = {
         'img_size': (128, 128),
         '{data_loader}': lambda: loader('train',
                                         inputs=['c:0', 'l:0', 'a:2'],
-                                        outputs=['c:3', 'l:3'],
+                                        outputs=['c:3'],
                                         stack=3
                                         ),
         '{val_loader}': lambda: loader('val',
                                        inputs=['c:0', 'l:0'],
-                                       outputs=['c:3', 'l:3'],
+                                       outputs=['c:3'],
                                        stack=3
                                        ),
         # 'train_ic_transform': transform(),
@@ -62,7 +62,8 @@ config = {
                 ResNet3DAutoEncoder(*get_configs('resnet50')),
                 only_decoder=True,
             ),
-            action=True
+            action=True,
+            only_tactile=True
         ),
 
         # train
