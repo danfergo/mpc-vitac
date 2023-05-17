@@ -27,6 +27,13 @@ from piqa import SSIM, HaarPSI, VSI, PSNR, LPIPS
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
+mse = nn.MSELoss()
+
+
+def noloss(output, target):
+    return mse(output, target) * 0.0
+
+
 config = {
     'description': """
         # Train VisGel Auto-encoder
@@ -38,13 +45,13 @@ config = {
         'data_path': '/media/danfergo/SSD2T/vitac_worlds',
         'img_size': (128, 128),
         '{data_loader}': lambda: loader('train',
-                                        inputs=['c:0', 'l:0', 'a:2'],
-                                        outputs=['c:3'],
+                                        inputs=['c:0', 'l:0', 'a:0'],
+                                        outputs=['c:3', 'l:3'],
                                         stack=3
                                         ),
         '{val_loader}': lambda: loader('val',
-                                       inputs=['c:0', 'l:0'],
-                                       outputs=['c:3'],
+                                       inputs=['c:0', 'l:0', 'a:0'],
+                                       outputs=['c:3', 'l:3'],
                                        stack=3
                                        ),
         # 'train_ic_transform': transform(),
@@ -55,21 +62,19 @@ config = {
                 e.ws('experiments', 'nn', 'objects365-resnet50.pth'),
                 ResNet3DAutoEncoder(*get_configs('resnet50')),
                 only_decoder=True,
-
             ),
             load_dict(
                 e.ws('experiments', 'nn', 'objects365-resnet50.pth'),
                 ResNet3DAutoEncoder(*get_configs('resnet50')),
                 only_decoder=True,
             ),
-            action=True,
-            only_tactile=True
+            action=True
         ),
 
         # train
         'train_device': 'cuda',
         '{perceptual_loss}': lambda: VGGPerceptualLoss().to(e.train_device),
-        '{loss}': lambda: (e.perceptual_loss, e.perceptual_loss),
+        '{loss}': lambda: (noloss, e.perceptual_loss),
         '{optimizer}': lambda: optim.Adadelta(e.model.parameters(), lr=e.lr),
         'epochs': 100,
         'batch_size': 24,

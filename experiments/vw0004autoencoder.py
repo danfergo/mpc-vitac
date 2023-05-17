@@ -38,12 +38,12 @@ config = {
         'data_path': '/media/danfergo/SSD2T/vitac_worlds',
         'img_size': (128, 128),
         '{data_loader}': lambda: loader('train',
-                                        inputs=['c:0', 'l:0', 'a:2'],
+                                        inputs=['c:0', 'l:0', 'a:0'],
                                         outputs=['c:3', 'l:3'],
                                         stack=3
                                         ),
         '{val_loader}': lambda: loader('val',
-                                       inputs=['c:0', 'l:0'],
+                                       inputs=['c:0', 'l:0', 'a:0'],
                                        outputs=['c:3', 'l:3'],
                                        stack=3
                                        ),
@@ -73,7 +73,7 @@ config = {
         'epochs': 100,
         'batch_size': 24,
         'batches_per_epoch': 50,
-        'feed_size': 1,
+        'feed_size': 2,
 
         # validation
         '{metrics}': lambda: [
