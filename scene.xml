@@ -1,10 +1,10 @@
 <mujoco>
             
             <default>
-        
-        
-
-        <default class="visual">
+                <default class="pp-block">
+                     <geom type="box" size="0.03 0.03 0.03" mass="0.01" material="#1:wood" zaxis="0 1 0" />
+                </default>
+            <default class="visual">
             <geom type="mesh" contype="0" conaffinity="0" group="2" />
         </default>
         <default class="collision">
@@ -60,19 +60,13 @@
       </default>
     </default>
   </default>
-
-    <compiler angle="radian" autolimits="true" />
-            <option noslip_iterations="15">
-                <flag multiccd="enable" />
-              </option>
-              
-            <size nconmax="10000" njmax="10000" />
-
-            
+            <compiler angle="radian" autolimits="true" />
  
+            <size nconmax="10000" njmax="10000" />
             <visual>
                 
                 <map znear="0.001" zfar="100" />
+
             </visual>
 
             <asset>
@@ -80,6 +74,11 @@
                 <texture name="#1:#1:texplane" type="2d" builtin="checker" rgb1=".2 .3 .4" rgb2=".1 0.15 0.2" width="512" height="512" mark="cross" markrgb=".8 .8 .8" />    
                 <material name="#1:#1:matplane" reflectance="0.3" texture="#1:#1:texplane" texrepeat="1 1" texuniform="true" />
             <texture type="skybox" file="/home/danfergo/Projects/PhD/mpc_vitac/worlds/assets/robot_lab.png" rgb1="0.6 0.6 0.6" rgb2="0 0 0" />
+                <texture name="#1:wood_texture" type="cube" file="/home/danfergo/Projects/PhD/mpc_vitac/worlds/assets/white_wood.png" width="400" height="400" />
+                <material name="#1:wood" texture="#1:wood_texture" specular="0.1" />
+                <material name="#1:dark_wood" texture="#1:wood_texture" rgba="0.2 0.2 0.2 1" specular="0.1" />
+                <material name="#1:gray_wood" texture="#1:wood_texture" rgba="0.6 0.4 0.2 1" specular="0.1" />
+                <material name="#1:white_wood" texture="#1:wood_texture" rgba="0.6 0.6 0.6 1" specular="0.1" />
             <material name="cam#2:black_plastic" rgba=".3 .3 .3 1" />
                 <material name="cam#2:gray_ring" rgba="1 1 1 1" />
             <material name="arm#3:black" specular="0.5" shininess="0.25" rgba="0.033 0.033 0.033 1" />
@@ -87,45 +86,45 @@
         <material name="arm#3:linkgray" specular="0.5" shininess="0.25" rgba="0.82 0.82 0.82 1" />
         <material name="arm#3:urblue" specular="0.5" shininess="0.25" rgba="0.49 0.678 0.8 1" />
 
-        <mesh name="arm#3:base_0" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/base_0.obj" />
-        <mesh name="arm#3:base_1" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/base_1.obj" />
-        <mesh name="arm#3:shoulder_0" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/shoulder_0.obj" />
-        <mesh name="arm#3:shoulder_1" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/shoulder_1.obj" />
-        <mesh name="arm#3:shoulder_2" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/shoulder_2.obj" />
-        <mesh name="arm#3:upperarm_0" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/upperarm_0.obj" />
-        <mesh name="arm#3:upperarm_1" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/upperarm_1.obj" />
-        <mesh name="arm#3:upperarm_2" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/upperarm_2.obj" />
-        <mesh name="arm#3:upperarm_3" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/upperarm_3.obj" />
-        <mesh name="arm#3:forearm_0" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/forearm_0.obj" />
-        <mesh name="arm#3:forearm_1" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/forearm_1.obj" />
-        <mesh name="arm#3:forearm_2" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/forearm_2.obj" />
-        <mesh name="arm#3:forearm_3" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/forearm_3.obj" />
-        <mesh name="arm#3:wrist1_0" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/wrist1_0.obj" />
-        <mesh name="arm#3:wrist1_1" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/wrist1_1.obj" />
-        <mesh name="arm#3:wrist1_2" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/wrist1_2.obj" />
-        <mesh name="arm#3:wrist2_0" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/wrist2_0.obj" />
-        <mesh name="arm#3:wrist2_1" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/wrist2_1.obj" />
-        <mesh name="arm#3:wrist2_2" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/wrist2_2.obj" />
-        <mesh name="arm#3:wrist3" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/wrist3.obj" />
+        <mesh name="arm#3:base_0" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/base_0.obj" />
+        <mesh name="arm#3:base_1" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/base_1.obj" />
+        <mesh name="arm#3:shoulder_0" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/shoulder_0.obj" />
+        <mesh name="arm#3:shoulder_1" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/shoulder_1.obj" />
+        <mesh name="arm#3:shoulder_2" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/shoulder_2.obj" />
+        <mesh name="arm#3:upperarm_0" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/upperarm_0.obj" />
+        <mesh name="arm#3:upperarm_1" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/upperarm_1.obj" />
+        <mesh name="arm#3:upperarm_2" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/upperarm_2.obj" />
+        <mesh name="arm#3:upperarm_3" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/upperarm_3.obj" />
+        <mesh name="arm#3:forearm_0" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/forearm_0.obj" />
+        <mesh name="arm#3:forearm_1" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/forearm_1.obj" />
+        <mesh name="arm#3:forearm_2" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/forearm_2.obj" />
+        <mesh name="arm#3:forearm_3" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/forearm_3.obj" />
+        <mesh name="arm#3:wrist1_0" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/wrist1_0.obj" />
+        <mesh name="arm#3:wrist1_1" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/wrist1_1.obj" />
+        <mesh name="arm#3:wrist1_2" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/wrist1_2.obj" />
+        <mesh name="arm#3:wrist2_0" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/wrist2_0.obj" />
+        <mesh name="arm#3:wrist2_1" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/wrist2_1.obj" />
+        <mesh name="arm#3:wrist2_2" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/wrist2_2.obj" />
+        <mesh name="arm#3:wrist3" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/ur5e/assets/wrist3.obj" />
     <material name="gripper#4:metal" rgba="0.58 0.58 0.58 1" />
     <material name="gripper#4:silicone" rgba="0.1882 0.1882 0.1882 1" />
     <material name="gripper#4:gray" rgba="0.4627 0.4627 0.4627 1" />
     <material name="gripper#4:black" rgba="0.149 0.149 0.149 1" />
 
-    <mesh class="2f85" name="gripper#4:base_mount" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/robotiq_2f85/assets/base_mount.stl" />
-    <mesh class="2f85" name="gripper#4:base" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/robotiq_2f85/assets/base.stl" />
-    <mesh class="2f85" name="gripper#4:driver" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/robotiq_2f85/assets/driver.stl" />
-    <mesh class="2f85" name="gripper#4:coupler" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/robotiq_2f85/assets/coupler.stl" />
-    <mesh class="2f85" name="gripper#4:follower" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/robotiq_2f85/assets/follower.stl" />
-    <mesh class="2f85" name="gripper#4:follower_trimmed" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/robotiq_2f85/assets/follower_trimmed.stl" />
-    <mesh class="2f85" name="gripper#4:pad" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/robotiq_2f85/assets/pad.stl" />
-    <mesh class="2f85" name="gripper#4:silicone_pad" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/robotiq_2f85/assets/silicone_pad.stl" />
-    <mesh class="2f85" name="gripper#4:spring_link" file="/home/danfergo/.local/lib/python3.8/site-packages/yarok/comm/components/robotiq_2f85/assets/spring_link.stl" />
+    <mesh class="2f85" name="gripper#4:base_mount" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/robotiq_2f85/assets/base_mount.stl" />
+    <mesh class="2f85" name="gripper#4:base" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/robotiq_2f85/assets/base.stl" />
+    <mesh class="2f85" name="gripper#4:driver" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/robotiq_2f85/assets/driver.stl" />
+    <mesh class="2f85" name="gripper#4:coupler" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/robotiq_2f85/assets/coupler.stl" />
+    <mesh class="2f85" name="gripper#4:follower" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/robotiq_2f85/assets/follower.stl" />
+    <mesh class="2f85" name="gripper#4:follower_trimmed" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/robotiq_2f85/assets/follower_trimmed.stl" />
+    <mesh class="2f85" name="gripper#4:pad" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/robotiq_2f85/assets/pad.stl" />
+    <mesh class="2f85" name="gripper#4:silicone_pad" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/robotiq_2f85/assets/silicone_pad.stl" />
+    <mesh class="2f85" name="gripper#4:spring_link" file="/home/danfergo/miniconda3/envs/mpc_vitac/lib/python3.8/site-packages/yarok/comm/components/robotiq_2f85/assets/spring_link.stl" />
   <material name="left_geltip#5:glass_material" rgba="1 1 1 0.1" />
                 <material name="left_geltip#5:white_elastomer" rgba="1 1 1 1" />
                 <material name="left_geltip#5:black_plastic" rgba=".3 .3 .3 1" />
                 
-                <material name="left_geltip#5:label_color" rgba="255 255 255 1.0" />
+                <material name="left_geltip#5:label_color" rgba="255 0 0 1.0" />
         
                 <mesh name="left_geltip#5:geltip_shell" file="/home/danfergo/Projects/PhD/mpc_vitac/worlds/components/geltip/meshes/shell_open.stl" scale="0.001 0.001 0.001" />
                 <mesh name="left_geltip#5:geltip_sleeve" file="/home/danfergo/Projects/PhD/mpc_vitac/worlds/components/geltip/meshes/sleeve_open.stl" scale="0.001 0.001 0.001" />
@@ -146,7 +145,7 @@
                 <material name="right_geltip#6:white_elastomer" rgba="1 1 1 1" />
                 <material name="right_geltip#6:black_plastic" rgba=".3 .3 .3 1" />
                 
-                <material name="right_geltip#6:label_color" rgba="255 255 255 1.0" />
+                <material name="right_geltip#6:label_color" rgba="0 255 0 1.0" />
         
                 <mesh name="right_geltip#6:geltip_shell" file="/home/danfergo/Projects/PhD/mpc_vitac/worlds/components/geltip/meshes/shell_open.stl" scale="0.001 0.001 0.001" />
                 <mesh name="right_geltip#6:geltip_sleeve" file="/home/danfergo/Projects/PhD/mpc_vitac/worlds/components/geltip/meshes/sleeve_open.stl" scale="0.001 0.001 0.001" />
@@ -170,24 +169,29 @@
                 <body name="#1:#1:floor">
                     <geom name="#1:#1:ground" type="plane" size="0 0 1" pos="0 0 0" quat="1 0 0 0" material="#1:#1:matplane" />
                 </body>
-            <body euler="1.57 0 0" pos="1.0 0.8 0.2">
+            <light directional="true" diffuse="0.1 0.0 0.1" specular="0.1 0.0 0.1" pos="1.0 1.0 5.0" dir="0 -1 -1" />
+                <body pos="0.5 -1.3 0.8" euler="1.57 -3.14 0">
                     <body>
                     <geom type="box" size="0.08 0.04 0.02" pos="0 0 -0.005" material="cam#2:black_plastic" />
                     <geom type="cylinder" size="0.02 0.02" material="cam#2:gray_ring" />
-                    <camera name="cam#2:cam" zaxis="0 0 -1" />
+                    <camera name="cam#2:cam" zaxis="0 0 -1" mode="targetbody" target="#1:table_base" />
                 </body>
             </body>
                 
-                <body name="#1:rope" pos="0.08 0.11 0.28">
-                    <composite type="grid" count="40 1 1" spacing="0.01" offset="1 0 0">
-                        <joint kind="main" damping="0.001" frictionloss="0.0001" />
-                        <tendon kind="main" width="0.007" rgba=".8 .2 .1 1" />
-                        <geom size=".004" rgba=".8 .2 .1 1" mass="0.0001" friction="0.001 0.005 0.0001" />
-                        <pin coord="39" /> 
-                    </composite>
-                </body>
-
-                <body euler="0 0 1.57" pos="0.5 -0.37 0">
+                
+                <body pos="0.3 0.11 0.135" name="#1:walls">
+                    <geom type="box" pos="-0.35 0 0" size="0.01 0.4 0.015" material="#1:dark_wood" />
+                    <geom type="box" pos="0.35 0 0" size="0.01 0.4 0.015" material="#1:dark_wood" />
+                    <geom type="box" pos="0 -0.35 0" size="0.4 0.01 0.014" material="#1:dark_wood" />
+                    <geom type="box" pos="0 0.35 0" size="0.4 0.01 0.014" material="#1:dark_wood" />
+               </body>  
+                
+               <body pos="0.3 0.11 0" name="#1:table_base">
+                    <geom type="box" pos="-0.45 0.29 0" size="0.1 0.1 0.28" material="#1:gray_wood" />
+                    <geom type="box" pos="0 0 0" size="0.4 0.4 0.12" material="#1:white_wood" />
+               </body>  
+                
+                <body euler="0 0 1.57" pos="-0.15 0.4 0.28">
                     <body name="arm#3:base" quat="1 0 0 1">
             <inertial mass="4.0" pos="0 0 0" diaginertia="0.00443333156 0.00443333156 0.0072" />
             <geom mesh="arm#3:base_0" material="arm#3:black" class="visual" />
@@ -278,11 +282,15 @@
                     <body>
                     
                        
-                       <geom density="0.1" type="mesh" mesh="left_geltip#5:geltip_glass" pos="0.0 0.0 -0.003" solimp="1.0 1.2 0.001 0.5 2" solref="0.02 1" material="left_geltip#5:glass_material" /> 
+                       <geom mass="0.1" type="box" pos="0 0 0.03" rgba="0 0 0 0" condim="6" solimp="1.0 1.2 0.001 0.5 2" solref="0.02 1" size="0.011 0.011 0.02" /> 
+
+                       
+                       
+                            
                        <geom type="mesh" mesh="left_geltip#5:geltip_elastomer_inv" contype="32" conaffinity="32" material="left_geltip#5:white_elastomer" /> 
                        
                        
-                       <geom density="0.1" type="mesh" mesh="left_geltip#5:geltip_elastomer" friction="1 0.05 0.01" contype="32" conaffinity="32" pos="0.0 0.0 -0.007" material="left_geltip#5:white_elastomer" />
+                       <geom density="0.1" type="mesh" mesh="left_geltip#5:geltip_elastomer" friction="1 0.05 0.01" contype="32" conaffinity="32" pos="0.0 0.0 -0.007" material="left_geltip#5:white_elastomer" /> 
                     </body>
         
                 </body>
@@ -323,11 +331,15 @@
                     <body>
                     
                        
-                       <geom density="0.1" type="mesh" mesh="right_geltip#6:geltip_glass" pos="0.0 0.0 -0.003" solimp="1.0 1.2 0.001 0.5 2" solref="0.02 1" material="right_geltip#6:glass_material" /> 
+                       <geom mass="0.1" type="box" pos="0 0 0.03" rgba="0 0 0 0" condim="6" solimp="1.0 1.2 0.001 0.5 2" solref="0.02 1" size="0.011 0.011 0.02" /> 
+
+                       
+                       
+                            
                        <geom type="mesh" mesh="right_geltip#6:geltip_elastomer_inv" contype="32" conaffinity="32" material="right_geltip#6:white_elastomer" /> 
                        
                        
-                       <geom density="0.1" type="mesh" mesh="right_geltip#6:geltip_elastomer" friction="1 0.05 0.01" contype="32" conaffinity="32" pos="0.0 0.0 -0.007" material="right_geltip#6:white_elastomer" />
+                       <geom density="0.1" type="mesh" mesh="right_geltip#6:geltip_elastomer" friction="1 0.05 0.01" contype="32" conaffinity="32" pos="0.0 0.0 -0.007" material="right_geltip#6:white_elastomer" /> 
                     </body>
         
                 </body>
@@ -346,9 +358,30 @@
             </body>
         </body>
     </body>
-            </worldbody>
+            <body>
+                        <freejoint />
+                        <geom class="pp-block" pos="0.12 0.010000000000000009 0.131" rgba="0.0 0.0 0.8 1" />
+                    </body>
+                <body>
+                        <freejoint />
+                        <geom class="pp-block" pos="0.12 0.010000000000000009 0.191" rgba="0.8 0.8 0.0 1" />
+                    </body>
+                <body>
+                        <freejoint />
+                        <geom class="pp-block" pos="0.12 0.010000000000000009 0.251" rgba="0.0 0.0 0.8 1" />
+                    </body>
+                <body>
+                        <freejoint />
+                        <geom class="pp-block" pos="0.12 0.19 0.131" rgba="0.0 0.0 0.8 1" />
+                    </body>
+                <body>
+                        <freejoint />
+                        <geom class="pp-block" pos="0.39 0.1 0.131" rgba="0.0 0.8 0.8 1" />
+                    </body>
+                </worldbody>
 
-        <sensor>
+        <option impratio="50" noslip_iterations="15" />
+            <sensor>
         <actuatorpos name="arm#3:shoulder_pan_pos_sensor" actuator="arm#3:shoulder_pan" />
         <actuatorpos name="arm#3:shoulder_lift_pos_sensor" actuator="arm#3:shoulder_lift" />
         <actuatorpos name="arm#3:elbow_pos_sensor" actuator="arm#3:elbow" />

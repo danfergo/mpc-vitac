@@ -168,7 +168,15 @@ class GelTipInterfaceHW:
                               solimp="1.0 1.2 0.001 0.5 2" 
                               solref="0.02 1"
                               material="glass_material" /> 
-                       <geom if="cubic_core" mass="0" type="box" pos="0 0 0.03" rgba="0 0 0 0" size="0.011 0.011 0.02"/> 
+                       <geom if="cubic_core" 
+                            mass="0.1" 
+                            type="box" 
+                            pos="0 0 0.03" 
+                            rgba="0 0 0 0" 
+                            condim="6"
+                            solimp="1.0 1.2 0.001 0.5 2" 
+                            solref="0.02 1"
+                            size="0.011 0.011 0.02"/> 
 
                        <!-- inverted, mesh, for limiting the depth-map -->
                        <!-- changing this geom/mesh changes the depth maps -->
@@ -187,7 +195,7 @@ class GelTipInterfaceHW:
                               contype="32" 
                               conaffinity="32" 
                               pos="0.0 0.0 -0.007"
-                              material="white_elastomer"/>
+                              material="white_elastomer"/> 
                     </body>
         
                 </body>

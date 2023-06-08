@@ -3,7 +3,7 @@ import time
 
 from yarok.comm.components.cam.cam import Cam
 
-from worlds.shared.cross_spawn import parallel_run
+from worlds.shared.cross_spawn import run_parallel
 from worlds.shared.memory import Memory
 from worlds.shared.robotbody import RobotBody
 from .components.geltip.geltip import GelTip
@@ -138,7 +138,7 @@ def launch_world(**kwargs):
 
 
 if __name__ == '__main__':
-    parallel_run(launch_world,
+    run_parallel(launch_world,
                  {
                      'dz': [-2, 3],
                      'do': [-2, 3],

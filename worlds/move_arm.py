@@ -1,5 +1,4 @@
 import time
-from random import sample, randint, choice
 
 import yaml
 from yarok.comm.components.cam.cam import Cam
@@ -17,22 +16,6 @@ from yarok.comm.components.robotiq_2f85.robotiq_2f85 import Robotiq2f85
 
 from math import pi
 
-colors = {
-    'red': [1, 0, 0],
-    'green': [0, 1, 0],
-    'blue': [0, 0, 1],
-    'yellow': [1, 1, 0],
-    'magenta': [1, 0, 1],
-    'cyan': [0, 1, 1]
-}
-
-
-def color_map(c, s=0.8):
-    if c in colors:
-        color = colors[c]
-        return f'{color[0] * s} {color[1] * s} {color[2] * s}'
-    return c
-
 
 @component(
     extends=EmptyWorld,
@@ -44,14 +27,10 @@ def color_map(c, s=0.8):
         Cam
     ],
     defaults={
-        'color_map': color_map,
-        'bs': 0.03,
         'sx': 0,
         'sy': 0,
         'ex': 0,
-        'ey': 0,
-        'pick_blocks': ['red', 'green', 'blue', 'cyan'],
-        # 'placed_blocks': ['yellow', 'green'],
+        'ey': 0
     },
     template="""
         <mujoco>
@@ -62,68 +41,68 @@ def color_map(c, s=0.8):
                     rgb1="0.6 0.6 0.6" 
                     rgb2="0 0 0"/>
                 <texture 
-                    name="wood_texture"
+                    name="white_wood_texture"
                     type="cube" 
                     file="assets/white_wood.png"
                     width="400" 
                     height="400"/>
-                <material name="wood" texture="wood_texture" specular="0.1"/>
-                <material name="gray_wood" texture="wood_texture" rgba="0.6 0.4 0.2 1" specular="0.1"/>
-                <material name="white_wood" texture="wood_texture" rgba="0.6 0.6 0.6 1" specular="0.1"/>
+                <material name="white_wood" texture="white_wood_texture" rgba="0.6 0.6 0.6 1" specular="0.1"/>
+                <material name="gray_wood" texture="white_wood_texture" rgba="0.6 0.4 0.2 1" specular="0.1"/>
+                <material name="red_wood" texture="white_wood_texture" rgba="0.8 0 0 1" specular="0.1"/>
+                <material name="green_wood" texture="white_wood_texture" rgba="0 0.8 0 1" specular="0.1"/>
+                <material name="yellow_wood" texture="white_wood_texture" rgba="0.8 0.8 0 1" specular="0.1"/>
             </asset>
-            <default>
-                <default class='pp-block'>
-                     <geom type="box" 
-                           size="{bs} {bs} {bs}"
-                           mass="0.0001"
-                           material="wood"
-                           zaxis="0 1 0"/>
-                </default>
-            </default>
             <worldbody>
-                <light directional="true" 
-                    diffuse="{color_map(light, 0.1)}" 
-                    specular="{color_map(light, 0.1)}" 
-                    pos="1.0 1.0 5.0" 
-                    dir="0 -1 -1"/>
-                <body pos="{0.3 + p_cam[0]*0.1} -1.3 {0.6 + p_cam[0]*0.1}" euler="1.57 -3.14 0">
+                <body euler="1.57 -3.14 0" pos="0.25 -1.3 0.4">
                     <cam name="cam" />
                 </body>
                 
-                <!-- pick blocks -->
-                <for each="range(len(pick_blocks))" as="i">
-                    <body>
-                        <freejoint/>
-                        <geom 
-                            class="pp-block" 
-                            pos="{0.13 + sx*0.01} {-0.135 + sy*0.01} {0.131 + i*2*bs}" 
-                            rgba="{color_map(pick_blocks[i])} 1"/>
-                    </body>
-                </for>
+                <!-- blocks -->
+                <body>
+                    <freejoint/>
+                    <geom 
+                        type="box" 
+                        size="0.03 0.03 0.03" 
+                        pos="${0.13 + sx*0.01} ${-0.135 + sy*0.01} 0.131" 
+                        mass="0.0001"
+                        material="red_wood"
+                        zaxis="0 1 0"/>
+                </body>
+                <body>
+                    <freejoint/>
+                    <geom 
+                        type="box" 
+                        size="0.03 0.03 0.03" 
+                        pos="${0.13 + sx*0.01} ${-0.135 + sy*0.01} 0.191" 
+                        mass="0.0001"
+                        material="green_wood"
+                        zaxis="0 1 0"/>
+                </body>
                 
-               <!-- <for each="range(len(placed_blocks))" as="i">
-                    <body>
-                        <freejoint/>
-                        <geom 
-                            class="pp-block"
-                            pos="{0.43 + ex*0.01} {-0.135 + ey*0.01} {0.131 + i*2*bs}" 
-                            rgba="{color_map(pick_blocks[i])} 1"/>
-                    </body>
-                </for> -->
+                <body>
+                    <freejoint/>
+                    <geom 
+                        type="box" 
+                        size="0.03 0.03 0.03" 
+                        pos="${0.13 + sx*0.01} ${-0.135 + sy*0.01} 0.221" 
+                        mass="0.0001"
+                        material="yellow_wood"
+                        zaxis="0 1 0"/>
+                </body>
                 
-               <body pos="0.3 0.11 0" name="table_base">
+               <body pos="0.3 0.11 0">
                     <geom type="box" pos="-0.45 0.29 0" size="0.1 0.1 0.3" material="gray_wood"/>
                     <geom type="box" pos="0 0 0" size="0.4 0.4 0.1" material="white_wood"/>
                </body>  
                 
                 <body euler="0 0 1.57" pos="-0.15 0.4 0.3">
                     <ur5e name='arm'>
-                       <robotiq-2f85 name="gripper" left_tip="{True}" right_tip="{True}" parent="ee_link"> 
+                       <robotiq-2f85 name="gripper" parent="ee_link"> 
                           <body pos="0.02 -0.017 0.053" xyaxes="0 -1 0 1 0 0" parent="right_tip">
-                                <geltip name="left_geltip" cubic_core="{True}" label_color="255 0 0"/>
+                                <geltip name="left_geltip" parent="left_tip"/>
                             </body>
                            <body pos="-0.02 -0.017 0.053" xyaxes="0 1 0 -1 0 0" parent="left_tip">
-                                <geltip name="right_geltip" cubic_core="{True}" label_color="0 255 0"/>
+                                <geltip name="right_geltip" parent="right_tip"/>
                             </body>
                         </robotiq-2f85> 
                     </ur5e> 
@@ -166,7 +145,6 @@ class PickAndPlaceBehaviour:
         sy = config['sy'] * 0.01
         ex = config['ex'] * 0.01
         ey = config['ey'] * 0.01
-        self.pick_blocks = config['pick_blocks']
 
         self.START_POS_UP = [0.3 + sx, -0.5 + sy, 0.21]
         self.START_POS_DOWN = [0.3 + sx, -0.5 + sy, 0.11]
@@ -205,7 +183,7 @@ class PickAndPlaceBehaviour:
         self.memory.prepare()
 
         # do the pick and place.
-        for i in range(len(self.pick_blocks)):
+        for i in range(3):
             # before grasping.
             move_arm(self.START_POS_UP)
 
@@ -231,9 +209,23 @@ def launch_world(**kwargs):
         'world': BlocksTowerTestWorld,
         'behaviour': PickAndPlaceBehaviour,
         'defaults': {
+            'plugins': [
+            ],
             'behaviour': kwargs,
             'components': {
-                '/': kwargs
+                '/': kwargs,
+                # '/gripper': {
+                #     'left_tip': False,
+                #     'right_tip': False
+                # },
+                '/left_geltip': {
+                    'cubic_core': True,
+                    'label_color': '0 255 0'
+                },
+                '/right_geltip': {
+                    'cubic_core': True,
+                    'label_color': '255 0 0'
+                }
             }
         },
 
@@ -241,23 +233,16 @@ def launch_world(**kwargs):
 
 
 if __name__ == '__main__':
-    # launch_world(**{
-    #     'i': 1,
-    #     'sx': 0,
-    #     'sy': 0,
-    #     'ex': 0,
-    #     'ey': 0,
-    #     'pick_blocks': ['red', 'green', 'blue'],
-    #     'placed_blocks': [],
-    # })
-    colors_names = list(colors.keys())
-
-    run_all(launch_world, {
-        'sx': range(0, 5),
-        'sy': range(0, 5),
-        'ex': range(0, 5),
-        'ey': range(0, 5),
-        'light': lambda: choice(colors_names),
-        'pick_blocks': lambda: sample(colors_names, 3),
-        'p_cam': lambda: (randint(-2, 3), randint(-1, 2)),
-    }, parallel=4)
+    launch_world(**{
+        'i': 1,
+        'sx': 0,
+        'sy': 0,
+        'ex': 0,
+        'ey': 0
+    })
+    # run_all(launch_world, {
+    #     'sx': range(0, 3),
+    #     'sy': range(0, 3),
+    #     'ex': range(0, 3),
+    #     'ey': range(0, 3)
+    # }, parallel=2)

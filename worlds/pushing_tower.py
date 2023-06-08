@@ -1,7 +1,7 @@
 import time
 from yarok.comm.components.cam.cam import Cam
 
-from worlds.shared.cross_spawn import parallel_run
+from worlds.shared.cross_spawn import run_parallel
 from worlds.shared.memory import Memory
 from worlds.shared.robotbody import RobotBody
 from .components.geltip.geltip import GelTip
@@ -80,6 +80,7 @@ class PushingTowerBehaviour:
 
     def on_start(self):
         self.memory.prepare()
+        # self.body.arm.set_speed(1000)
         self.pl.wait(
             self.body.arm.move_xyz(xyz=[0.1, 0.4, 0.3], xyz_angles=FRONT)
         )
@@ -112,7 +113,7 @@ def launch_world(**kwargs):
 
 
 if __name__ == '__main__':
-    parallel_run(launch_world,
+    run_parallel(launch_world,
                  {
                      'oz': [0, 6],
                      'dz': [-2, 3],

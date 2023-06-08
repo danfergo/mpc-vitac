@@ -91,7 +91,7 @@ def color_map(c, s=0.8):
                 </body>
                 
                 <!-- pick blocks -->
-                <for each="range(len(pick_blocks))" as="i">
+                <!-- <for each="range(len(pick_blocks))" as="i">
                     <body>
                         <freejoint/>
                         <geom 
@@ -99,7 +99,7 @@ def color_map(c, s=0.8):
                             pos="{0.13 + sx*0.01} {-0.135 + sy*0.01} {0.131 + i*2*bs}" 
                             rgba="{color_map(pick_blocks[i])} 1"/>
                     </body>
-                </for>
+                </for>-->
                 
                <!-- <for each="range(len(placed_blocks))" as="i">
                     <body>
@@ -157,7 +157,7 @@ class PickAndPlaceBehaviour:
         self.body.arm.set_speed(pi / 24)
         self.pl: Platform = injector.get(Platform)
         self.config = config
-        self.memory = Memory('pick_and_place', self.body, self.config, skip_right_sensor=False)
+        self.memory = Memory('pick_and_place2', self.body, self.config, skip_right_sensor=False)
 
         self.DOWN = [3.11, 1.6e-7, 3.11]
         self.BLOCK_SIZE = 0.06
